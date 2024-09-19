@@ -9,29 +9,37 @@ import re
 @api_view(
     ["POST"]
 )  # allows to specify which type of request can be accepted, in this case a post request
-def translate_english(request): #function definition, passed with the request
+def translate(request): #function definition, passed with the request
 
     body_data = request.data #body of data from post request
-    translate_english_text = body_data.get("q", "") # extracts key value "q", if not defaults to empty string
+    translate_text = body_data.get("q", "") # extracts key value "q", if not defaults to empty string
 
     # If the input is an empty string
-    if not translate_english_text: #if empty or none, returns original and translation with empty strings
-        return Response({"original_english_text": "", "translated_english_text": ""})
+    if not translate_text: #if empty or none, returns original and translation with empty strings
+        return Response({"original_text": "", "translated_text": ""})
 
     # Check if the input contains only valid alphabetic characters, uses a regex to confirm this.
-    if not re.match("^[A-Za-z\\s]+$", translate_english_text):
+    if not re.match("^[A-Za-z\\s]+$", translate_text):
          #re(regular expression)module imported is to match regex
         return Response(
             {
-                "original_english_text": translate_english_text,
-                "translated_english_text": "", ## returns an empty string
+                "original_text": translate_text,
+                "translated_text": "", ## returns an empty string
             }
         )
+
+    source_lang = body_data.get("source", "en")  # default to English if not provided
+    target_lang = body_data.get("target", "pt") 
+
+
 
     # LibreTranslate API request
     response = requests.post(
         "http://127.0.0.1:5000/translate",
-        json={"q": translate_english_text, "source": "en", "target": "pt"},
+        json={"q": translate_text, 
+              "source": source_lang, 
+              "target": target_lang,
+        },
         headers={"Content-Type": "application/json"},
     )
 
@@ -40,8 +48,8 @@ def translate_english(request): #function definition, passed with the request
         translated_text = translated_data.get("translatedText", "") #extracts translated text from the response
         return Response(
             {
-                "original_english_text": translate_english_text,
-                "translated_english_text": translated_text,
+                "original_text": translate_text,
+                "translated_text": translated_text,
             }
         )
     else:
