@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "api",
     "rest_framework",
     "corsheaders",
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -151,3 +152,45 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+# AWS S3 Configuration
+AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')  # or directly use your access key
+AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')  # or directly use your secret access key
+AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')  # or directly set your bucket name
+AWS_S3_FILE_OVERWRITE = False  # Do not overwrite files with the same name
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+ 
+STORAGES = {
+
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3StaticStorage",
+    },
+
+    "staticfiles":{
+        "BACKEND": "storages.backends.s3boto3.S3StaticStorage",
+    },
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+        'mysite': {  # Replace 'your_app_name' with the actual name of your app
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,  # Ensure log messages propagate to parent loggers
+        },
+    },
+}
+
+TIME_ZONE = "Europe/London"  # Use your local timezone if different
+USE_TZ = True

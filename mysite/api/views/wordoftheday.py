@@ -1,10 +1,11 @@
 from django.http import JsonResponse
-from ..models import Word 
+from ..models import Word
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 import random
-from django.core.cache import cache 
+from django.core.cache import cache
 from datetime import date
+
 
 @api_view(["GET"])
 def dailyWord(request):
