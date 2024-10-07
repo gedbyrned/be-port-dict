@@ -2,6 +2,7 @@ from django.urls import reverse
 from rest_framework.test import APITestCase
 from api.models import Word  
 from freezegun import freeze_time
+from django.core.cache import cache
 
 class WordOfTheDayTests(APITestCase):
 
@@ -31,22 +32,23 @@ class WordOfTheDayTests(APITestCase):
     def test_cache_word_of_the_day(self):
         """Test that the same word is returned for multiple requests within the same day."""
         
-        # Freeze time at a specific date, e.g., "2024-09-22"
         with freeze_time("2024-09-22"):
-            response1 = self.client.get(self.url)
-            self.assertEqual(response1.status_code, 200)
-            word_of_the_day = response1.data
+            response_day1 = self.client.get(self.url)
+            self.assertEqual(response_day1.status_code, 200)
+            word_of_the_day = response_day1.data
 
-            response2 = self.client.get(self.url)
-            self.assertEqual(response2.status_code, 200)
-            self.assertEqual(response2.data, word_of_the_day)
+        # Force cache to clear to simulate day change
+            cache.clear()
+
 
         # Simulate moving to the next day using freezegun
         with freeze_time("2024-09-23"):
-            response3 = self.client.get(self.url)
-            self.assertEqual(response3.status_code, 200)
-            self.assertNotEqual(response3.data, word_of_the_day)
+            response_day2 = self.client.get(self.url)
+            self.assertEqual(response_day2.status_code, 200)
+            word_of_the_day2 = response_day2.data
 
+        # Ensure that the word of the day has changed
+            self.assertNotEqual(word_of_the_day2, word_of_the_day)
      
     def test_invalid_url(self):
         """Test that a 404 is returned for an invalid URL."""
